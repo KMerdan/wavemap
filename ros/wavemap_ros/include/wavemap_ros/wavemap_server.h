@@ -50,14 +50,19 @@ class WavemapServer {
     return occupancy_map_;
   }
 
+  void setMapUpdatedCallback(
+      std::function<void(const VolumetricDataStructureBase&)> callback);
+
  private:
   const WavemapServerConfig config_;
 
   VolumetricDataStructureBase::Ptr occupancy_map_;
 
+  // Transform and depth inputs
   std::shared_ptr<TfTransformer> transformer_;
   std::vector<std::unique_ptr<InputHandler>> input_handlers_;
 
+  // ROS interfaces
   void subscribeToTimers(const ros::NodeHandle& nh);
   ros::Timer map_pruning_timer_;
   ros::Timer map_thresholding_timer_;
@@ -66,20 +71,20 @@ class WavemapServer {
   void subscribeToTopics(ros::NodeHandle& nh);
 
   void advertiseTopics(ros::NodeHandle& nh_private);
-
   ros::Publisher map_pub_;
 
+  void advertiseServices(ros::NodeHandle& nh_private);
+  ros::ServiceServer republish_whole_map_srv_;
+  ros::ServiceServer save_map_srv_;
+  ros::ServiceServer load_map_srv_;
+
+  // Map publishing
   using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
   TimePoint last_map_pub_time_;
   std::unordered_set<Index3D, Index3DHash> block_publishing_queue_;
   template <typename HashedMapT>
   void publishHashedMap(HashedMapT* hashed_map,
                         bool republish_whole_map = false);
-
-  void advertiseServices(ros::NodeHandle& nh_private);
-  ros::ServiceServer republish_whole_map_srv_;
-  ros::ServiceServer save_map_srv_;
-  ros::ServiceServer load_map_srv_;
 };
 }  // namespace wavemap
 

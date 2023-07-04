@@ -237,6 +237,11 @@ void PointcloudInputHandler::processQueue() {
                     << "s. Total integration time: "
                     << integration_timer_.getTotalWallTime() << "s.");
 
+    // Notify subscribers that the map was updated
+    if (map_update_callback_) {
+      std::invoke(map_update_callback_);
+    }
+
     // Publish debugging visualizations
     if (shouldPublishReprojectedPointcloud()) {
       publishReprojectedPointcloud(
