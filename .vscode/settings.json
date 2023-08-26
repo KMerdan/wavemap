@@ -1,0 +1,8 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#362A34",
+        "titleBar.activeBackground": "#4B3A49",
+        "titleBar.activeForeground": "#FBFAFB"
+    },
+    "ros.distro": "humble"
+}
