@@ -1,42 +1,23 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.20)
 project(wavemap)
 
-# Dependencies
-find_package(catkin
-    REQUIRED COMPONENTS glog_catkin eigen_catkin tracy_catkin minkindr)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-if (ENABLE_BENCHMARKING)
-  find_package(benchmark REQUIRED)
-endif ()
+# Dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
 
 # Compiler definitions and options
 include(cmake/wavemap-extras.cmake)
 add_wavemap_compile_definitions_and_options()
 
-# Setup catkin package
-catkin_package(
-    INCLUDE_DIRS
-    include
-    test/include
-    LIBRARIES
-    ${PROJECT_NAME}
-    CATKIN_DEPENDS
-    glog_catkin
-    eigen_catkin
-    tracy_catkin
-    minkindr
-    CFG_EXTRAS
-    wavemap-extras.cmake)
-# NOTE: The test headers are normally not exported (e.g. by adding test/include
-# to the catkin_package's INCLUDE_DIRS), but we make an exception for this base
-# package's test headers, such that common tooling and test fixtures can be
-# reused in downstream wavemap packages.
-
-# For all targets
-include_directories(include ${catkin_INCLUDE_DIRS})
+# Include directories
+include_directories(include)
 
 # Libraries
-# cmake-lint: disable=C0301
 add_library(${PROJECT_NAME}
     src/config/value_with_unit.cc
     src/data_structure/volumetric/hashed_blocks.cc
@@ -68,25 +49,27 @@ add_library(${PROJECT_NAME}
     src/integrator/integrator_factory.cc
     src/utils/stopwatch.cc
     src/utils/thread_pool.cc)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
+ament_target_dependencies(${PROJECT_NAME} rclcpp)
 
 # Install targets
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
-# Mark cpp header files for installation
+# Install header files
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DESTINATION include/${PROJECT_NAME}
   FILES_MATCHING PATTERN "*.h"
 )
 
 # Tests
-if (CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(
-      test_${PROJECT_NAME}
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  
+  add_executable(test_${PROJECT_NAME}
       test/src/data_structure/test_aabb.cc
       test/src/data_structure/test_haar_cell.cc
       test/src/data_structure/test_hashed_blocks.cc
@@ -119,8 +102,10 @@ if (CATKIN_ENABLE_TESTING)
       test/src/utils/test_thread_pool.cc
       test/src/utils/test_tree_math.cc)
   target_include_directories(test_${PROJECT_NAME} PRIVATE test/include)
-  target_link_libraries(test_${PROJECT_NAME} ${PROJECT_NAME} gtest_main)
-endif ()
+  target_link_libraries(test_${PROJECT_NAME} ${PROJECT_NAME})
+  ament_target_dependencies(test_${PROJECT_NAME} rclcpp)
+  ament_add_gtest(test_${PROJECT_NAME} EXECUTABLE test_${PROJECT_NAME})
+endif()
 
 # Benchmarks
 if (ENABLE_BENCHMARKING)
@@ -133,3 +118,9 @@ if (ENABLE_BENCHMARKING)
   target_link_libraries(benchmark_sparse_vector ${PROJECT_NAME}
       benchmark::benchmark)
 endif ()
+
+# Export dependencies and targets
+ament_export_dependencies(rclcpp)
+ament_export_targets(${PROJECT_NAME} HAS_LIBRARY_TARGET)
+
+ament_package()
