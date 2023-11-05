@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>minkindr</name>
+  <version>1.0.0</version>
+  <description>minkindr</description>
+
+  <maintainer email="paul.furgale@gmail.com">Paul Furgale</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/minkindr</url> <!-- Update with actual package URL if available -->
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Add test dependencies if needed -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+</package>
