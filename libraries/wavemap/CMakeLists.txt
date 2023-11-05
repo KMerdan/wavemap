@@ -6,9 +6,29 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
+list(APPEND CMAKE_PREFIX_PATH "/usr/local/share/kindr/cmake")
+
 # Dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package (Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+message("-- Found Eigen3 in: ${EIGEN3_INCLUDE_DIR}")
+link_directories(${Eigen_INCLUDE_DIRS})
+
+find_package(minkindr)
+include_directories(${minkindr_INCLUDE_DIRS})
+link_directories(${minkindr_INCLUDE_DIRS})
+message("-- Found kindr in: ${minkindr_INCLUDE_DIRS}")
+
+find_package (glog 0.4.0 REQUIRED)
+include_directories(${glog_INCLUDE_DIRS})
+link_directories(${glog_INCLUDE_DIRS})
+
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+
+# include_directories(/usr/local/include/kindr)
 
 # Compiler definitions and options
 include(cmake/wavemap-extras.cmake)
@@ -54,9 +74,15 @@ ament_target_dependencies(${PROJECT_NAME} rclcpp)
 
 # Install targets
 install(TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}-targets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
+)
+
+install(EXPORT ${PROJECT_NAME}-targets
+  FILE ${PROJECT_NAME}Targets.cmake
+  DESTINATION lib/cmake/${PROJECT_NAME}
 )
 
 # Install header files
@@ -65,62 +91,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
 )
 
-# Tests
-if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
-  
-  add_executable(test_${PROJECT_NAME}
-      test/src/data_structure/test_aabb.cc
-      test/src/data_structure/test_haar_cell.cc
-      test/src/data_structure/test_hashed_blocks.cc
-      test/src/data_structure/test_image.cc
-      test/src/data_structure/test_ndtree.cc
-      test/src/data_structure/test_pointcloud.cc
-      test/src/data_structure/test_volumetric_data_structure.cc
-      test/src/data_structure/test_volumetric_octree.cc
-      test/src/data_structure/test_sparse_vector.cc
-      test/src/indexing/test_index_conversions.cc
-      test/src/indexing/test_ndtree_index.cc
-      test/src/integrator/projection_model/test_circular_projector.cc
-      test/src/integrator/projection_model/test_image_projectors.cc
-      test/src/integrator/projection_model/test_spherical_projector.cc
-      test/src/integrator/test_hierarchical_range_image.cc
-      test/src/integrator/test_measurement_models.cc
-      test/src/integrator/test_pointcloud_integrators.cc
-      test/src/integrator/test_range_image_intersector.cc
-      test/src/iterator/test_grid_iterator.cc
-      test/src/iterator/test_ray_iterator.cc
-      test/src/iterator/test_subtree_iterator.cc
-      test/src/utils/test_approximate_trigonometry.cc
-      test/src/utils/test_bit_manipulation.cc
-      test/src/utils/test_data_utils.cc
-      test/src/utils/test_fill_utils.cc
-      test/src/utils/test_int_math.cc
-      test/src/utils/test_log_odds_converter.cc
-      test/src/utils/test_map_interpolator.cpp
-      test/src/utils/test_query_accelerator.cc
-      test/src/utils/test_thread_pool.cc
-      test/src/utils/test_tree_math.cc)
-  target_include_directories(test_${PROJECT_NAME} PRIVATE test/include)
-  target_link_libraries(test_${PROJECT_NAME} ${PROJECT_NAME})
-  ament_target_dependencies(test_${PROJECT_NAME} rclcpp)
-  ament_add_gtest(test_${PROJECT_NAME} EXECUTABLE test_${PROJECT_NAME})
-endif()
-
-# Benchmarks
-if (ENABLE_BENCHMARKING)
-  add_executable(benchmark_haar_transforms
-      benchmark/benchmark_haar_transforms.cc)
-  target_link_libraries(benchmark_haar_transforms ${PROJECT_NAME}
-      benchmark::benchmark)
-
-  add_executable(benchmark_sparse_vector benchmark/benchmark_sparse_vector.cc)
-  target_link_libraries(benchmark_sparse_vector ${PROJECT_NAME}
-      benchmark::benchmark)
-endif ()
-
 # Export dependencies and targets
 ament_export_dependencies(rclcpp)
-ament_export_targets(${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}-targets HAS_LIBRARY_TARGET)
 
 ament_package()

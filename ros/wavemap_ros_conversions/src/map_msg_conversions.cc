@@ -1,7 +1,7 @@
 #include "wavemap_ros_conversions/map_msg_conversions.h"
 
 #include <ros/console.h>
-#include <tracy/Tracy.hpp>
+
 
 namespace wavemap::convert {
 bool mapToRosMsg(const VolumetricDataStructureBase& map,
@@ -40,7 +40,7 @@ bool mapToRosMsg(const VolumetricDataStructureBase& map,
 
 bool rosMsgToMap(const wavemap_msgs::Map& msg,
                  VolumetricDataStructureBase::Ptr& map) {
-  ZoneScoped;
+  
   // Check validity
   if ((msg.wavelet_octree.size() == 1) !=
       (msg.hashed_wavelet_octree.size() != 1)) {
@@ -74,7 +74,7 @@ bool rosMsgToMap(const wavemap_msgs::Map& msg,
 }
 
 void mapToRosMsg(const WaveletOctree& map, wavemap_msgs::WaveletOctree& msg) {
-  ZoneScoped;
+  
   // Serialize the map and data structure's metadata
   msg.min_cell_width = map.getMinCellWidth();
   msg.min_log_odds = map.getMinLogOdds();
@@ -102,7 +102,7 @@ void mapToRosMsg(const WaveletOctree& map, wavemap_msgs::WaveletOctree& msg) {
 
 void rosMsgToMap(const wavemap_msgs::WaveletOctree& msg,
                  WaveletOctree::Ptr& map) {
-  ZoneScoped;
+  
   // Deserialize the map's config
   WaveletOctreeConfig config;
   config.min_cell_width = msg.min_cell_width;
@@ -151,7 +151,7 @@ void mapToRosMsg(
     const HashedWaveletOctree& map, wavemap_msgs::HashedWaveletOctree& msg,
     std::optional<std::unordered_set<Index3D, Index3DHash>> include_blocks,
     std::shared_ptr<ThreadPool> thread_pool) {
-  ZoneScoped;
+  
   // Constants
   constexpr FloatingPoint kNumericalNoise = 1e-3f;
   const auto min_log_odds = map.getMinLogOdds() + kNumericalNoise;
@@ -219,7 +219,7 @@ void blockToRosMsg(const HashedWaveletOctree::BlockIndex& block_index,
                    const HashedWaveletOctree::Block& block,
                    FloatingPoint min_log_odds, FloatingPoint max_log_odds,
                    wavemap_msgs::HashedWaveletOctreeBlock& msg) {
-  ZoneScoped;
+  
   // Convenience type for elements on the stack used to iterate over the map
   struct StackElement {
     const FloatingPoint scale;
@@ -272,7 +272,7 @@ void blockToRosMsg(const HashedWaveletOctree::BlockIndex& block_index,
 
 void rosMsgToMap(const wavemap_msgs::HashedWaveletOctree& msg,
                  HashedWaveletOctree::Ptr& map) {
-  ZoneScoped;
+  
   // Deserialize the map's config and initialize the data structure
   HashedWaveletOctreeConfig config;
   config.min_cell_width = msg.min_cell_width;
@@ -349,7 +349,7 @@ void mapToRosMsg(
     wavemap_msgs::HashedWaveletOctree& msg,
     std::optional<std::unordered_set<Index3D, Index3DHash>> include_blocks,
     std::shared_ptr<ThreadPool> thread_pool) {
-  ZoneScoped;
+  
   // Constants
   constexpr FloatingPoint kNumericalNoise = 1e-3f;
   const auto min_log_odds = map.getMinLogOdds() + kNumericalNoise;
@@ -420,7 +420,7 @@ void blockToRosMsg(const HashedChunkedWaveletOctree::BlockIndex& block_index,
                    FloatingPoint min_log_odds, FloatingPoint max_log_odds,
                    IndexElement tree_height,
                    wavemap_msgs::HashedWaveletOctreeBlock& msg) {
-  ZoneScoped;
+  
   // Define convenience types and constants
   struct StackElement {
     const OctreeIndex node_index;

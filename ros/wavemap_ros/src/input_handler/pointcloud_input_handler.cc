@@ -1,7 +1,7 @@
 #include "wavemap_ros/input_handler/pointcloud_input_handler.h"
 
 #include <sensor_msgs/point_cloud2_iterator.h>
-#include <tracy/Tracy.hpp>
+
 #include <wavemap/integrator/projective/projective_integrator.h>
 #include <wavemap_ros_conversions/time_conversions.h>
 
@@ -52,7 +52,7 @@ PointcloudInputHandler::PointcloudInputHandler(
 
 void PointcloudInputHandler::callback(
     const sensor_msgs::PointCloud2& pointcloud_msg) {
-  ZoneScoped;
+  
   // Skip empty clouds
   const size_t num_points = pointcloud_msg.height * pointcloud_msg.width;
   if (num_points == 0) {
@@ -128,7 +128,7 @@ void PointcloudInputHandler::callback(
 #ifdef LIVOX_AVAILABLE
 void PointcloudInputHandler::callback(
     const livox_ros_driver2::CustomMsg& pointcloud_msg) {
-  ZoneScoped;
+  
   // Skip empty clouds
   if (pointcloud_msg.points.empty()) {
     ROS_WARN_STREAM("Skipping empty pointcloud with timestamp "
@@ -155,7 +155,7 @@ void PointcloudInputHandler::callback(
 #endif
 
 void PointcloudInputHandler::processQueue() {
-  ZoneScoped;
+  
   while (!pointcloud_queue_.empty()) {
     auto& oldest_msg = pointcloud_queue_.front();
 

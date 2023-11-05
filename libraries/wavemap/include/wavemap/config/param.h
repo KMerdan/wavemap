@@ -5,6 +5,7 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <optional>
 
 #include "wavemap/common.h"
 #include "wavemap/utils/meta/type_utils.h"

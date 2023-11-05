@@ -1,6 +1,6 @@
 #include "wavemap_ros/rosbag_processor.h"
 
-#include <tracy/Tracy.hpp>
+
 
 namespace wavemap {
 RosbagProcessor::~RosbagProcessor() {
@@ -36,7 +36,7 @@ bool RosbagProcessor::bagsContainTopic(const std::string& topic_name) {
 }
 
 bool RosbagProcessor::processAll() {
-  ZoneScoped;
+  
   ros::Time side_tasks_last_timestamp(0);
   const ros::Duration kSideTasksDt(0.01);
 
@@ -54,14 +54,12 @@ bool RosbagProcessor::processAll() {
 
     // Handle callbacks
     if (auto it = callbacks_.find(msg.getTopic()); it != callbacks_.end()) {
-      ZoneScopedN("rosbagMsgHandleCallbacks");
       it->second(msg);
     }
 
     // Handle republishing
     if (auto it = republishers_.find(msg.getTopic());
         it != republishers_.end()) {
-      ZoneScopedN("rosbagMsgPublishToTopic");
       it->second.publish(msg);
     }
 
@@ -79,7 +77,6 @@ bool RosbagProcessor::processAll() {
 
       // Process node callbacks (publishers, timers,...)
       {
-        ZoneScopedN("rosbagSpinOnce");
         ros::spinOnce();
       }
     }

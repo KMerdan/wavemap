@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-#include <tracy/Tracy.hpp>
+
 #include <wavemap_msgs/Map.h>
 #include <wavemap_ros_conversions/map_msg_conversions.h>
 
@@ -46,7 +46,6 @@ void WavemapServer::publishHashedMap(HashedMapT* hashed_map,
                          map_msg.hashed_wavelet_octree.emplace_back(),
                          blocks_to_publish, thread_pool_);
     {
-      ZoneScopedN("publishMapRosMsg");
       map_pub_.publish(map_msg);
     }
 
