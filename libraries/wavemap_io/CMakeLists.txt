@@ -10,37 +10,42 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
-# Compiler definitions and options
-add_wavemap_compile_definitions_and_options()
+find_package (Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+message("-- Found Eigen3 in: ${EIGEN3_INCLUDE_DIR}")
+link_directories(${Eigen_INCLUDE_DIRS})
+
+find_package(wavemap REQUIRED) # Ensure this package is findable
+
+# Include directories
+include_directories(include ${wavemap_INCLUDE_DIRS})
 
 # Libraries
 add_library(${PROJECT_NAME}
     src/file_conversions.cc
     src/stream_conversions.cc)
-ament_target_dependencies(${PROJECT_NAME} rclcpp)
+ament_target_dependencies(${PROJECT_NAME} rclcpp wavemap) # Add wavemap to dependencies
 
-# Tests
-if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
-  
-  add_executable(test_${PROJECT_NAME}
-      test/src/test_file_conversions.cc)
-  
-  target_link_libraries(test_${PROJECT_NAME} ${PROJECT_NAME})
-  ament_target_dependencies(test_${PROJECT_NAME} rclcpp)
-  ament_add_gtest(test_${PROJECT_NAME} EXECUTABLE test_${PROJECT_NAME})
-endif()
+# Link libraries
+target_link_libraries(${PROJECT_NAME} ${wavemap_LIBRARIES}) # Link against wavemap libraries
 
-# Install targets
+# Install targets and create an export set
 install(TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}_targets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-# Export dependencies and targets
-ament_export_dependencies(rclcpp)
+# Install header files
+install(DIRECTORY include/
+  DESTINATION include
+)
 
-ament_export_targets(${PROJECT_NAME} HAS_LIBRARY_TARGET)
+# Export the targets
+ament_export_targets(${PROJECT_NAME}_targets)
+
+# Export dependencies
+ament_export_dependencies(rclcpp wavemap)
 
 ament_package()
