@@ -6,31 +6,14 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
-list(APPEND CMAKE_PREFIX_PATH "/usr/local/share/kindr/cmake")
-
 # Dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package (Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
-message("-- Found Eigen3 in: ${EIGEN3_INCLUDE_DIR}")
-link_directories(${Eigen_INCLUDE_DIRS})
-
-find_package(minkindr)
-include_directories(${minkindr_INCLUDE_DIRS})
-link_directories(${minkindr_INCLUDE_DIRS})
-message("-- Found kindr in: ${minkindr_INCLUDE_DIRS}")
-
-find_package (glog 0.4.0 REQUIRED)
-include_directories(${glog_INCLUDE_DIRS})
-link_directories(${glog_INCLUDE_DIRS})
-
+find_package(Eigen3 REQUIRED)
+find_package(minkindr REQUIRED)
+find_package(glog 0.4.0 REQUIRED)
 find_package(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
 
-# include_directories(/usr/local/include/kindr)
-
-# Compiler definitions and options
 include(cmake/wavemap-extras.cmake)
 add_wavemap_compile_definitions_and_options()
 
@@ -70,6 +53,17 @@ add_library(${PROJECT_NAME}
     src/utils/stopwatch.cc
     src/utils/thread_pool.cc)
 
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${EIGEN3_INCLUDE_DIR}
+    ${minkindr_INCLUDE_DIRS}
+    ${glog_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    ${minkindr_LIBRARIES}
+    ${glog_LIBRARIES}
+)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 ament_target_dependencies(${PROJECT_NAME} rclcpp)
 
 # Install targets
@@ -94,5 +88,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # Export dependencies and targets
 ament_export_dependencies(rclcpp)
 ament_export_targets(${PROJECT_NAME}-targets HAS_LIBRARY_TARGET)
+
+ament_export_libraries(${PROJECT_NAME})
 
 ament_package()

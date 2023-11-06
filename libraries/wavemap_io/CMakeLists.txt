@@ -1,20 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(wavemap_io)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
 # Dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-
-find_package (Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
-message("-- Found Eigen3 in: ${EIGEN3_INCLUDE_DIR}")
-link_directories(${Eigen_INCLUDE_DIRS})
-
+find_package(Eigen3 REQUIRED)
 find_package(wavemap REQUIRED) # Ensure this package is findable
 
 # Include directories
@@ -24,10 +14,13 @@ include_directories(include ${wavemap_INCLUDE_DIRS})
 add_library(${PROJECT_NAME}
     src/file_conversions.cc
     src/stream_conversions.cc)
-ament_target_dependencies(${PROJECT_NAME} rclcpp wavemap) # Add wavemap to dependencies
-
-# Link libraries
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${EIGEN3_INCLUDE_DIR}
+    ${wavemap_INCLUDE_DIRS}
+)
 target_link_libraries(${PROJECT_NAME} ${wavemap_LIBRARIES}) # Link against wavemap libraries
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
+ament_target_dependencies(${PROJECT_NAME} rclcpp wavemap) # Add wavemap to dependencies
 
 # Install targets and create an export set
 install(TARGETS ${PROJECT_NAME}
